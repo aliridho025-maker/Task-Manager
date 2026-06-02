@@ -26,6 +26,7 @@ export default function TaskBoard({
   const [filter, setFilter] = useState("all");
   const [sheet, setSheet] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [detail, setDetail] = useState<Task | null>(null);
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -156,17 +157,17 @@ export default function TaskBoard({
                   {done && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
                 </button>
 
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div onClick={() => setDetail(t)} style={{ flex: 1, minWidth: 0, cursor: "pointer" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                     <span style={{ width: 7, height: 7, borderRadius: 999, background: PRIO_COLOR[t.priority], flexShrink: 0 }} />
                     <span style={{ fontSize: 16, fontWeight: 600, textDecoration: done ? "line-through" : "none", color: done ? "var(--muted)" : "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</span>
                   </div>
-                  {t.description && <div style={{ fontSize: 14, color: "var(--muted)", marginTop: 4, paddingLeft: 14 }}>{t.description}</div>}
+                  {t.description && <div style={{ fontSize: 14, color: "var(--muted)", marginTop: 4, paddingLeft: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.description}</div>}
                   <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 9, paddingLeft: 14, alignItems: "center" }}>
                     {t.category && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: "var(--brand-soft)", color: "var(--brand)" }}>{t.category}</span>}
                     {Number(t.budget) > 0 && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: "var(--green-soft)", color: "var(--green)" }}>Rp {Math.round(Number(t.budget)).toLocaleString("id-ID")}</span>}
                     {t.due_date && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: late ? "var(--red-soft)" : "var(--surface-2)", color: late ? "var(--red)" : "var(--muted)" }}>{late ? "⚠ " : ""}{fmt(t.due_date)}</span>}
-                    <select value={t.status} onChange={(e) => updateTask(t.id, { status: e.target.value as Task["status"] })}
+                    <select value={t.status} onClick={(e) => e.stopPropagation()} onChange={(e) => updateTask(t.id, { status: e.target.value as Task["status"] })}
                       style={{ width: "auto", minHeight: 0, padding: "3px 26px 3px 9px", fontSize: 12, fontWeight: 600, borderRadius: 7, border: "1px solid var(--line)", background: "var(--surface)", backgroundPosition: "right 7px center" }}>
                       <option value="todo">Belum</option>
                       <option value="proses">Proses</option>
@@ -233,6 +234,76 @@ export default function TaskBoard({
           </div>
         </div>
       )}
+
+      {/* Modal detail tugas */}
+      {detail && (() => {
+        const t = detail;
+        const late = isLate(t);
+        const STATUS_OPTS: [Task["status"], string][] = [["todo", "Belum"], ["proses", "Proses"], ["selesai", "Selesai"]];
+        return (
+          <div onClick={() => setDetail(null)}
+            style={{ position: "fixed", inset: 0, background: "rgba(20,20,26,0.4)", zIndex: 35, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            <div onClick={(e) => e.stopPropagation()}
+              style={{ width: "100%", maxWidth: 560, background: "var(--surface)", borderRadius: "22px 22px 0 0", padding: "10px 18px 28px", maxHeight: "90dvh", overflowY: "auto", boxShadow: "var(--shadow-lg)" }}>
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--line-strong)", margin: "0 auto 18px" }} />
+
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ width: 9, height: 9, borderRadius: 999, background: PRIO_COLOR[t.priority], flexShrink: 0 }} />
+                <h2 style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.3 }}>{t.title}</h2>
+              </div>
+              <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
+                Prioritas {t.priority === "tinggi" ? "penting" : t.priority}
+              </p>
+
+              {t.description && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 12, color: "var(--faint)", fontWeight: 600, marginBottom: 4 }}>CATATAN</div>
+                  <p style={{ fontSize: 15, color: "var(--text)", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{t.description}</p>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+                  <div style={{ fontSize: 12, color: "var(--muted)" }}>Kategori</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, marginTop: 2 }}>{t.category || "—"}</div>
+                </div>
+                <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+                  <div style={{ fontSize: 12, color: "var(--muted)" }}>Tenggat</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, marginTop: 2, color: late ? "var(--red)" : "var(--text)" }}>{t.due_date ? fmt(t.due_date) : "—"}{late ? " ⚠" : ""}</div>
+                </div>
+              </div>
+
+              {Number(t.budget) > 0 && (
+                <div style={{ background: "var(--green-soft)", borderRadius: "var(--radius)", padding: "12px 14px", marginTop: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--green)" }}>Budget / nilai (tercatat di Keuangan)</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: "var(--green)", marginTop: 2 }}>Rp {Math.round(Number(t.budget)).toLocaleString("id-ID")}</div>
+                </div>
+              )}
+
+              <div style={{ marginTop: 20 }}>
+                <div style={{ fontSize: 13, color: "var(--muted)", fontWeight: 600, marginBottom: 8 }}>Status progress</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {STATUS_OPTS.map(([val, label]) => {
+                    const active = t.status === val;
+                    return (
+                      <button key={val}
+                        onClick={() => { updateTask(t.id, { status: val }); setDetail({ ...t, status: val }); }}
+                        style={{
+                          flex: 1, padding: "12px 0", fontSize: 14, fontWeight: 600, borderRadius: "var(--radius-sm)",
+                          border: active ? "none" : "1.5px solid var(--line-strong)",
+                          background: active ? "var(--brand)" : "var(--surface)",
+                          color: active ? "#fff" : "var(--muted)",
+                        }}>{label}</button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button onClick={() => setDetail(null)} className="btn-text" style={{ width: "100%", marginTop: 18 }}>Tutup</button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
