@@ -11,14 +11,16 @@ type Task = {
   priority: "tinggi" | "sedang" | "rendah";
   status: "todo" | "proses" | "selesai";
   due_date: string | null;
+  budget: number;
+  project_id: string | null;
 };
 
 const PRIO_RANK = { tinggi: 0, sedang: 1, rendah: 2 };
 const PRIO_COLOR = { tinggi: "var(--red)", sedang: "var(--amber)", rendah: "var(--green)" };
 
 export default function TaskBoard({
-  initialTasks,
-}: { initialTasks: Task[] }) {
+  initialTasks, onProjectCreated,
+}: { initialTasks: Task[]; onProjectCreated?: () => void }) {
   const supabase = createClient();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [filter, setFilter] = useState("all");
@@ -30,18 +32,32 @@ export default function TaskBoard({
   const [cat, setCat] = useState("");
   const [prio, setPrio] = useState<Task["priority"]>("sedang");
   const [due, setDue] = useState("");
+  const [budget, setBudget] = useState("");
 
   const today = new Date().toISOString().slice(0, 10);
   const isLate = (t: Task) => !!t.due_date && t.status !== "selesai" && t.due_date < today;
 
-  function resetForm() { setTitle(""); setDesc(""); setCat(""); setDue(""); setPrio("sedang"); }
+  function resetForm() { setTitle(""); setDesc(""); setCat(""); setDue(""); setPrio("sedang"); setBudget(""); }
 
   async function addTask() {
     if (!title.trim() || busy) return;
     setBusy(true);
+    const budgetNum = (() => { const n = parseFloat(budget.replace(/[^\d.]/g, "")); return isNaN(n) ? 0 : n; })();
+
+    let projectId: string | null = null;
+    // Budget diisi → otomatis buat proyek baru (sekali cipta), budget jadi nilai/pemasukan.
+    if (budgetNum > 0) {
+      const { data: proj, error: pErr } = await supabase.from("projects").insert({
+        name: title.trim(), value: budgetNum, paid: 0, expense: 0, payment_status: "belum",
+      }).select().single();
+      if (pErr) { setBusy(false); alert("Gagal membuat proyek: " + pErr.message); return; }
+      if (proj) { projectId = proj.id; onProjectCreated?.(); }
+    }
+
     const { data, error } = await supabase.from("tasks").insert({
       title: title.trim(), description: desc.trim() || null, category: cat.trim() || null,
       priority: prio, due_date: due || null, status: "todo",
+      budget: budgetNum, project_id: projectId,
     }).select().single();
     setBusy(false);
     if (error) { alert("Gagal menyimpan: " + error.message); return; }
@@ -148,6 +164,7 @@ export default function TaskBoard({
                   {t.description && <div style={{ fontSize: 14, color: "var(--muted)", marginTop: 4, paddingLeft: 14 }}>{t.description}</div>}
                   <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 9, paddingLeft: 14, alignItems: "center" }}>
                     {t.category && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: "var(--brand-soft)", color: "var(--brand)" }}>{t.category}</span>}
+                    {Number(t.budget) > 0 && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: "var(--green-soft)", color: "var(--green)" }}>Rp {Math.round(Number(t.budget)).toLocaleString("id-ID")}</span>}
                     {t.due_date && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: late ? "var(--red-soft)" : "var(--surface-2)", color: late ? "var(--red)" : "var(--muted)" }}>{late ? "⚠ " : ""}{fmt(t.due_date)}</span>}
                     <select value={t.status} onChange={(e) => updateTask(t.id, { status: e.target.value as Task["status"] })}
                       style={{ width: "auto", minHeight: 0, padding: "3px 26px 3px 9px", fontSize: 12, fontWeight: 600, borderRadius: 7, border: "1px solid var(--line)", background: "var(--surface)", backgroundPosition: "right 7px center" }}>
@@ -199,6 +216,15 @@ export default function TaskBoard({
                   <option value="rendah">Rendah</option>
                 </select>
                 <input type="date" value={due} onChange={(e) => setDue(e.target.value)} style={{ flex: 1 }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 13, color: "var(--muted)", fontWeight: 500, display: "block", marginBottom: 5 }}>Budget / nilai (opsional)</label>
+                <input inputMode="numeric" placeholder="0" value={budget} onChange={(e) => setBudget(e.target.value)} />
+                {budget && parseFloat(budget.replace(/[^\d.]/g, "")) > 0 && (
+                  <p style={{ fontSize: 12, color: "var(--brand)", marginTop: 6 }}>
+                    Proyek &ldquo;{title || "tanpa judul"}&rdquo; akan dibuat otomatis di Keuangan sebagai pemasukan.
+                  </p>
+                )}
               </div>
               <button className="btn-brand" onClick={addTask} disabled={busy} style={{ marginTop: 4 }}>
                 {busy ? "Menyimpan..." : "Tambah tugas"}

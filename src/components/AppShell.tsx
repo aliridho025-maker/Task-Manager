@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import TaskBoard from "./TaskBoard";
 import FinanceBoard, { type Project } from "./FinanceBoard";
 
@@ -10,6 +11,7 @@ export default function AppShell({
   initialTasks, initialProjects, userEmail,
 }: { initialTasks: Task[]; initialProjects: Project[]; userEmail: string }) {
   const [tab, setTab] = useState<"tugas" | "keuangan">("tugas");
+  const router = useRouter();
 
   return (
     <div className="shell">
@@ -29,7 +31,7 @@ export default function AppShell({
       </div>
 
       {tab === "tugas"
-        ? <TaskBoard initialTasks={initialTasks} />
+        ? <TaskBoard initialTasks={initialTasks} onProjectCreated={() => router.refresh()} />
         : <FinanceBoard initialProjects={initialProjects} />}
 
       {/* Tab bar bawah */}
