@@ -1,32 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-
-type Task = {
-  id: string;
-  title: string;
-  description: string | null;
-  category: string | null;
-  priority: "tinggi" | "sedang" | "rendah";
-  status: "todo" | "proses" | "selesai";
-  due_date: string | null;
-  budget: number;
-  project_id: string | null;
-};
+import type { Task } from "./types";
 
 const PRIO_RANK = { tinggi: 0, sedang: 1, rendah: 2 };
 const PRIO_COLOR = { tinggi: "var(--red)", sedang: "var(--amber)", rendah: "var(--green)" };
 
 export default function TaskBoard({
-  initialTasks, onProjectCreated,
-}: { initialTasks: Task[]; onProjectCreated?: () => void }) {
+  initialTasks, onProjectCreated, openSignal,
+}: { initialTasks: Task[]; onProjectCreated?: () => void; openSignal?: number }) {
   const supabase = createClient();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [filter, setFilter] = useState("all");
   const [sheet, setSheet] = useState(false);
   const [busy, setBusy] = useState(false);
   const [detail, setDetail] = useState<Task | null>(null);
+
+  useEffect(() => {
+    if (openSignal && openSignal > 0) { resetForm(); setSheet(true); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSignal]);
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -176,17 +170,6 @@ export default function TaskBoard({
           })
         )}
       </div>
-
-      {/* FAB */}
-      <button onClick={() => { resetForm(); setSheet(true); }}
-        style={{
-          position: "fixed", bottom: 90, right: "max(18px, calc(50% - 280px + 18px))",
-          width: 58, height: 58, borderRadius: 18, background: "var(--brand)",
-          boxShadow: "0 6px 20px rgba(51,72,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 20,
-        }}>
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
 
       {/* Bottom sheet tambah tugas */}
       {sheet && (
