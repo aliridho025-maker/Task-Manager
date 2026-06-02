@@ -56,7 +56,7 @@ export default function ProfileBoard({
   );
 
   return (
-    <div className="pad" style={{ paddingTop: 8, paddingBottom: 100 }}>
+    <div className="pad" style={{ paddingTop: 8, paddingBottom: 120 }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 24px" }}>
         <div style={{ width: 84, height: 84, borderRadius: "50%", background: "var(--brand)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, fontWeight: 700 }}>
           {initials(profile.full_name ?? "", userEmail)}
@@ -67,7 +67,7 @@ export default function ProfileBoard({
 
       {!editing ? (
         <>
-          <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "2px 16px", boxShadow: "var(--shadow)" }}>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "2px 16px", boxShadow: "var(--shadow)", WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}>
             <Row label="Nama" value={profile.full_name || "—"} />
             <Row label="No. WhatsApp" value={profile.wa || "—"} />
             <Row label="Email" value={userEmail} />

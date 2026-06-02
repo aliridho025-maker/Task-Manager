@@ -6,6 +6,7 @@ import TaskBoard from "./TaskBoard";
 import FinanceBoard, { type Project } from "./FinanceBoard";
 import NotificationBoard from "./NotificationBoard";
 import ProfileBoard, { type Profile } from "./ProfileBoard";
+import { useRealtime } from "./useRealtime";
 import type { Task } from "./types";
 
 type Tab = "tugas" | "keuangan" | "notifikasi" | "profil";
@@ -30,6 +31,8 @@ export default function AppShell({
   const [addSignal, setAddSignal] = useState(0);
   const router = useRouter();
 
+  useRealtime(["tasks", "projects"], () => router.refresh());
+
   function handleAdd() {
     setTab("tugas");
     setAddSignal((n) => n + 1);
@@ -37,8 +40,8 @@ export default function AppShell({
 
   return (
     <div className="shell">
-      <div className="pad" style={{ paddingTop: 22, paddingBottom: 4 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px" }}>{TITLES[tab]}</h1>
+      <div className="glass-soft" style={{ position: "sticky", top: 0, zIndex: 20, padding: "calc(env(safe-area-inset-top) + 18px) 18px 12px" }}>
+        <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>{TITLES[tab]}</h1>
       </div>
 
       {tab === "tugas" && (
@@ -52,11 +55,11 @@ export default function AppShell({
         <ProfileBoard initialProfile={initialProfile} userId={userId} userEmail={userEmail} />
       )}
 
-      <nav style={{
-        position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-        width: "100%", maxWidth: 560, background: "rgba(255,255,255,0.94)",
-        backdropFilter: "blur(12px)", borderTop: "1px solid var(--line)",
-        display: "flex", alignItems: "center", paddingBottom: "env(safe-area-inset-bottom)", zIndex: 25,
+      <nav className="glass" style={{
+        position: "fixed", bottom: "calc(env(safe-area-inset-bottom) + 12px)", left: "50%", transform: "translateX(-50%)",
+        width: "calc(100% - 28px)", maxWidth: 460, borderRadius: 28,
+        display: "flex", alignItems: "center", padding: "8px 6px", zIndex: 25,
+        boxShadow: "0 8px 32px rgba(20,20,60,0.18), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}>
         <TabBtn label="Tugas" active={tab === "tugas"} onClick={() => setTab("tugas")}
           path="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
@@ -65,8 +68,8 @@ export default function AppShell({
 
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           <button onClick={handleAdd} aria-label="Tambah tugas"
-            style={{ width: 52, height: 52, borderRadius: 16, background: "var(--brand)", marginTop: -18, boxShadow: "0 6px 18px rgba(51,72,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            style={{ width: 50, height: 50, borderRadius: 17, background: "var(--brand)", boxShadow: "0 6px 18px rgba(51,72,255,0.45), inset 0 1px 0 rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
         </div>
 
@@ -82,9 +85,9 @@ export default function AppShell({
 function TabBtn({ label, active, onClick, path }: { label: string; active: boolean; onClick: () => void; path: string }) {
   return (
     <button onClick={onClick}
-      style={{ flex: 1, background: "none", padding: "10px 0 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: active ? "var(--brand)" : "var(--faint)" }}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
-      <span style={{ fontSize: 11, fontWeight: 600 }}>{label}</span>
+      style={{ flex: 1, background: "none", padding: "8px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: active ? "var(--brand)" : "var(--faint)" }}>
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.4 : 2} strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+      <span style={{ fontSize: 10.5, fontWeight: 600 }}>{label}</span>
     </button>
   );
 }

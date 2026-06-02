@@ -38,7 +38,7 @@ export default function NotificationBoard({
   const empty = baru.length === 0 && tenggat.length === 0;
 
   return (
-    <div className="pad" style={{ paddingTop: 8, paddingBottom: 100 }}>
+    <div className="pad" style={{ paddingTop: 8, paddingBottom: 120 }}>
       {empty && (
         <div style={{ textAlign: "center", color: "var(--faint)", padding: "70px 20px", fontSize: 15 }}>
           Tidak ada notifikasi.
@@ -53,7 +53,7 @@ export default function NotificationBoard({
               const late = t.due_date! < todayStr;
               return (
                 <div key={t.id} onClick={() => onOpenTask?.(t)}
-                  style={{ background: "var(--surface)", border: "1px solid var(--line)", borderLeft: `4px solid ${late ? "var(--red)" : "var(--amber)"}`, borderRadius: "var(--radius)", padding: "13px 15px", boxShadow: "var(--shadow)", cursor: "pointer" }}>
+                  style={{ background: "var(--surface)", border: "1px solid var(--line)", borderLeft: `4px solid ${late ? "var(--red)" : "var(--amber)"}`, borderRadius: "var(--radius)", padding: "13px 15px", boxShadow: "var(--shadow)", WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)", cursor: "pointer" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 15, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</span>
                     <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 600, color: late ? "var(--red)" : "var(--amber)" }}>
@@ -73,7 +73,7 @@ export default function NotificationBoard({
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {baru.map((t) => (
               <div key={t.id} onClick={() => onOpenTask?.(t)}
-                style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "13px 15px", boxShadow: "var(--shadow)", cursor: "pointer", display: "flex", gap: 12, alignItems: "center" }}>
+                style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "13px 15px", boxShadow: "var(--shadow)", WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)", cursor: "pointer", display: "flex", gap: 12, alignItems: "center" }}>
                 <span style={{ width: 8, height: 8, borderRadius: 999, background: PRIO_COLOR[t.priority], flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>

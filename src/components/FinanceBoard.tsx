@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 export type Project = {
@@ -26,6 +26,7 @@ const rupiah = (n: number) =>
 export default function FinanceBoard({ initialProjects }: { initialProjects: Project[] }) {
   const supabase = createClient();
   const [items, setItems] = useState<Project[]>(initialProjects);
+  useEffect(() => { setItems(initialProjects); }, [initialProjects]);
   const [sheet, setSheet] = useState(false);
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
@@ -91,7 +92,7 @@ export default function FinanceBoard({ initialProjects }: { initialProjects: Pro
   }, [items]);
 
   return (
-    <div style={{ paddingBottom: 100 }}>
+    <div style={{ paddingBottom: 120 }}>
       <div className="pad" style={{ paddingTop: 8 }}>
         {/* Ringkasan utama: profit bersih */}
         <div style={{ background: "var(--brand)", borderRadius: "var(--radius)", padding: "18px 20px", color: "#fff", marginBottom: 12 }}>
@@ -100,16 +101,16 @@ export default function FinanceBoard({ initialProjects }: { initialProjects: Pro
         </div>
 
         <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
-          <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+          <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px", WebkitBackdropFilter: "blur(14px)", backdropFilter: "blur(14px)" }}>
             <div style={{ fontSize: 12, color: "var(--muted)" }}>Sudah diterima</div>
             <div style={{ fontSize: 17, fontWeight: 700, color: "var(--green)", marginTop: 2 }}>{rupiah(totals.paid)}</div>
           </div>
-          <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+          <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px", WebkitBackdropFilter: "blur(14px)", backdropFilter: "blur(14px)" }}>
             <div style={{ fontSize: 12, color: "var(--muted)" }}>Sisa tagihan</div>
             <div style={{ fontSize: 17, fontWeight: 700, color: "var(--amber)", marginTop: 2 }}>{rupiah(totals.outstanding)}</div>
           </div>
         </div>
-        <div style={{ background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+        <div style={{ background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px", WebkitBackdropFilter: "blur(14px)", backdropFilter: "blur(14px)" }}>
           <div style={{ fontSize: 12, color: "var(--muted)" }}>Total pengeluaran</div>
           <div style={{ fontSize: 17, fontWeight: 700, color: "var(--red)", marginTop: 2 }}>{rupiah(totals.expense)}</div>
         </div>
@@ -126,7 +127,7 @@ export default function FinanceBoard({ initialProjects }: { initialProjects: Pro
             const profit = Number(p.paid) - Number(p.expense);
             return (
               <div key={p.id} onClick={() => openEdit(p)}
-                style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: 15, boxShadow: "var(--shadow)" }}>
+                style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: 15, boxShadow: "var(--shadow)", WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 16, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
@@ -167,9 +168,9 @@ export default function FinanceBoard({ initialProjects }: { initialProjects: Pro
       </button>
 
       {sheet && (
-        <div onClick={() => setSheet(false)}
+        <div onClick={() => setSheet(false)} className="sheet-backdrop"
           style={{ position: "fixed", inset: 0, background: "rgba(20,20,26,0.4)", zIndex: 40, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div onClick={(e) => e.stopPropagation()}
+          <div onClick={(e) => e.stopPropagation()} className="sheet-panel"
             style={{ width: "100%", maxWidth: 560, background: "var(--surface)", borderRadius: "22px 22px 0 0", padding: "10px 18px 28px", maxHeight: "90dvh", overflowY: "auto", boxShadow: "var(--shadow-lg)" }}>
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--line-strong)", margin: "0 auto 18px" }} />
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>

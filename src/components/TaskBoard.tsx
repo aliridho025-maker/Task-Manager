@@ -12,6 +12,7 @@ export default function TaskBoard({
 }: { initialTasks: Task[]; onProjectCreated?: () => void; openSignal?: number }) {
   const supabase = createClient();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  useEffect(() => { setTasks(initialTasks); }, [initialTasks]);
   const [filter, setFilter] = useState("all");
   const [sheet, setSheet] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -99,13 +100,13 @@ export default function TaskBoard({
   ];
 
   return (
-    <div style={{ paddingBottom: 100 }}>
+    <div style={{ paddingBottom: 120 }}>
       {/* Statistik ringkas */}
       <div className="pad" style={{ paddingTop: 8, paddingBottom: 8 }}>
         <div style={{ display: "flex", gap: 10 }}>
           {([["Belum", stats.todo, "var(--brand)"], ["Selesai", stats.done, "var(--green)"], ["Telat", stats.late, "var(--red)"]] as const).map(
             ([label, val, color]) => (
-              <div key={label} style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+              <div key={label} style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px", WebkitBackdropFilter: "blur(14px)", backdropFilter: "blur(14px)" }}>
                 <div style={{ fontSize: 22, fontWeight: 700, color }}>{val}</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 1 }}>{label}</div>
               </div>
@@ -145,7 +146,7 @@ export default function TaskBoard({
             return (
               <div key={t.id} style={{
                 background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)",
-                padding: 14, display: "flex", gap: 13, alignItems: "flex-start", boxShadow: "var(--shadow)", opacity: done ? 0.6 : 1,
+                padding: 14, display: "flex", gap: 13, alignItems: "flex-start", boxShadow: "var(--shadow)", WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)", opacity: done ? 0.6 : 1,
               }}>
                 <div onClick={() => setDetail(t)} style={{ flex: 1, minWidth: 0, cursor: "pointer" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -173,9 +174,9 @@ export default function TaskBoard({
 
       {/* Bottom sheet tambah tugas */}
       {sheet && (
-        <div onClick={() => setSheet(false)}
+        <div onClick={() => setSheet(false)} className="sheet-backdrop"
           style={{ position: "fixed", inset: 0, background: "rgba(20,20,26,0.4)", zIndex: 30, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div onClick={(e) => e.stopPropagation()}
+          <div onClick={(e) => e.stopPropagation()} className="sheet-panel"
             style={{ width: "100%", maxWidth: 560, background: "var(--surface)", borderRadius: "22px 22px 0 0", padding: "10px 18px 28px", boxShadow: "var(--shadow-lg)" }}>
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--line-strong)", margin: "0 auto 18px" }} />
             <h2 style={{ fontSize: 19, fontWeight: 700, marginBottom: 16 }}>Tugas baru</h2>
@@ -215,9 +216,9 @@ export default function TaskBoard({
         const late = isLate(t);
         const STATUS_OPTS: [Task["status"], string][] = [["todo", "Belum"], ["proses", "Proses"], ["selesai", "Selesai"]];
         return (
-          <div onClick={() => setDetail(null)}
+          <div onClick={() => setDetail(null)} className="sheet-backdrop"
             style={{ position: "fixed", inset: 0, background: "rgba(20,20,26,0.4)", zIndex: 35, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-            <div onClick={(e) => e.stopPropagation()}
+            <div onClick={(e) => e.stopPropagation()} className="sheet-panel"
               style={{ width: "100%", maxWidth: 560, background: "var(--surface)", borderRadius: "22px 22px 0 0", padding: "10px 18px 28px", maxHeight: "90dvh", overflowY: "auto", boxShadow: "var(--shadow-lg)" }}>
               <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--line-strong)", margin: "0 auto 18px" }} />
 
@@ -237,11 +238,11 @@ export default function TaskBoard({
               )}
 
               <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-                <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+                <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px", WebkitBackdropFilter: "blur(14px)", backdropFilter: "blur(14px)" }}>
                   <div style={{ fontSize: 12, color: "var(--muted)" }}>Kategori</div>
                   <div style={{ fontSize: 15, fontWeight: 600, marginTop: 2 }}>{t.category || "—"}</div>
                 </div>
-                <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px" }}>
+                <div style={{ flex: 1, background: "var(--surface-2)", borderRadius: "var(--radius)", padding: "12px 14px", WebkitBackdropFilter: "blur(14px)", backdropFilter: "blur(14px)" }}>
                   <div style={{ fontSize: 12, color: "var(--muted)" }}>Tenggat</div>
                   <div style={{ fontSize: 15, fontWeight: 600, marginTop: 2, color: late ? "var(--red)" : "var(--text)" }}>{t.due_date ? fmt(t.due_date) : "—"}{late ? " ⚠" : ""}</div>
                 </div>
