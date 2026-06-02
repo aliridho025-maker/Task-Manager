@@ -142,21 +142,17 @@ export default function TaskBoard({
           shown.map((t) => {
             const done = t.status === "selesai";
             const late = isLate(t);
+            const STATUS_BADGE: Record<Task["status"], { label: string; bg: string; color: string }> = {
+              todo: { label: "Belum", bg: "var(--surface-2)", color: "var(--muted)" },
+              proses: { label: "Proses", bg: "var(--amber-soft)", color: "var(--amber)" },
+              selesai: { label: "Selesai", bg: "var(--green-soft)", color: "var(--green)" },
+            };
+            const sb = STATUS_BADGE[t.status];
             return (
               <div key={t.id} style={{
                 background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)",
                 padding: 14, display: "flex", gap: 13, alignItems: "flex-start", boxShadow: "var(--shadow)", opacity: done ? 0.6 : 1,
               }}>
-                <button onClick={() => updateTask(t.id, { status: done ? "todo" : "selesai" })}
-                  style={{
-                    width: 24, height: 24, borderRadius: 7, flexShrink: 0, marginTop: 1, padding: 0,
-                    border: done ? "none" : "2px solid var(--line-strong)",
-                    background: done ? "var(--green)" : "transparent",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                  {done && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
-                </button>
-
                 <div onClick={() => setDetail(t)} style={{ flex: 1, minWidth: 0, cursor: "pointer" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                     <span style={{ width: 7, height: 7, borderRadius: 999, background: PRIO_COLOR[t.priority], flexShrink: 0 }} />
@@ -164,15 +160,10 @@ export default function TaskBoard({
                   </div>
                   {t.description && <div style={{ fontSize: 14, color: "var(--muted)", marginTop: 4, paddingLeft: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.description}</div>}
                   <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 9, paddingLeft: 14, alignItems: "center" }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: sb.bg, color: sb.color }}>{sb.label}</span>
                     {t.category && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: "var(--brand-soft)", color: "var(--brand)" }}>{t.category}</span>}
                     {Number(t.budget) > 0 && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: "var(--green-soft)", color: "var(--green)" }}>Rp {Math.round(Number(t.budget)).toLocaleString("id-ID")}</span>}
                     {t.due_date && <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: late ? "var(--red-soft)" : "var(--surface-2)", color: late ? "var(--red)" : "var(--muted)" }}>{late ? "⚠ " : ""}{fmt(t.due_date)}</span>}
-                    <select value={t.status} onClick={(e) => e.stopPropagation()} onChange={(e) => updateTask(t.id, { status: e.target.value as Task["status"] })}
-                      style={{ width: "auto", minHeight: 0, padding: "3px 26px 3px 9px", fontSize: 12, fontWeight: 600, borderRadius: 7, border: "1px solid var(--line)", background: "var(--surface)", backgroundPosition: "right 7px center" }}>
-                      <option value="todo">Belum</option>
-                      <option value="proses">Proses</option>
-                      <option value="selesai">Selesai</option>
-                    </select>
                   </div>
                 </div>
 
